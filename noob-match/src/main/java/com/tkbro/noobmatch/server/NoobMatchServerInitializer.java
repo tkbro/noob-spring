@@ -5,6 +5,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import java.net.InetSocketAddress;
 
 @Component
 public class NoobMatchServerInitializer {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     ServerChannelInitializer serverChannelInitializer;
@@ -27,6 +30,9 @@ public class NoobMatchServerInitializer {
 
     @PostConstruct
     public void start() throws Exception {
+
+        logger.info("Server Bootstrap init start.");
+
         EventLoopGroup bossGroup = new NioEventLoopGroup(bossCount);
         EventLoopGroup workerGroup = new NioEventLoopGroup(workerCount);
 
@@ -37,12 +43,17 @@ public class NoobMatchServerInitializer {
                     .childHandler(this.serverChannelInitializer);
 
             ChannelFuture channelFuture = bootstrap.bind(new InetSocketAddress(port)).sync();
+            logger.info("Server Bootstrap bind finish.");
+
             channelFuture.channel().closeFuture().sync();
+
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error(e.toString());
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
+
+            logger.info("Server close.");
         }
     }
 }
