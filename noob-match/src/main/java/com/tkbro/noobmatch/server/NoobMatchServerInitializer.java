@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.net.InetSocketAddress;
 
 @Component
 public class NoobMatchServerInitializer {
@@ -35,7 +36,7 @@ public class NoobMatchServerInitializer {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverChannelInitializer);
 
-            ChannelFuture channelFuture = bootstrap.bind(port).sync();
+            ChannelFuture channelFuture = bootstrap.bind(new InetSocketAddress(port)).sync();
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
