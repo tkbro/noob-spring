@@ -1,4 +1,4 @@
-package com.tkbro.noobmatch.example;
+package com.tkbro.noobmatch.handler;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;

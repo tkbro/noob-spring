@@ -1,6 +1,6 @@
 package com.tkbro.noobmatch.server;
 
-import com.tkbro.noobmatch.example.ExampleHandler;
+import com.tkbro.noobmatch.handler.ExampleHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
