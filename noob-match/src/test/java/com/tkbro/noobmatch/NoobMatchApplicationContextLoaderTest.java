@@ -1,5 +1,6 @@
-package com.tkbro.noobmatch.server;
+package com.tkbro.noobmatch;
 
+import com.tkbro.noobmatch.server.ServerChannelInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +15,5 @@ class NoobMatchApplicationContextLoaderTest {
     @Test
     void contextLoads() {
         assert applicationContext.getBean(ServerChannelInitializer.class) != null;
-//        assert true;
     }
 }
