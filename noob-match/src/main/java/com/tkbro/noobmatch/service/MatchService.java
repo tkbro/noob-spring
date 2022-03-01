@@ -23,6 +23,9 @@ public class MatchService {
     private Map<String, MatchingContext> matchPoolMap = new ConcurrentHashMap<>();
 
     public void joinMatching(MatchingJoinContext matchingJoinContext) {
+        if (matchingJoinContext == null)
+            return; // 핸들러 로직 만드는 도중 임시 처리
+
         long now = Instant.now().toEpochMilli();
         MatchingContext matchingContext = MatchingContext.builder()
                 .userId(matchingJoinContext.getUserId())
