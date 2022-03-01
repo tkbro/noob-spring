@@ -1,6 +1,9 @@
 package com.tkbro.noobtestclient;
 
+import com.tkbro.noobmatch.model.protocol.Api2MatchProtocol;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -9,6 +12,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
 
@@ -39,7 +44,21 @@ public class NoobTestClientApplication {
             while (true) {
                 input = scanner.nextLine();
 
-                future = serverChannel.writeAndFlush(input.concat("\n"));
+                if ("test".equals(input)) {
+
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    ObjectOutputStream oos = new ObjectOutputStream(bos);
+                    oos.writeBytes(input);
+                    byte[] bs = bos.toByteArray();
+
+                    ByteBuf buf = Unpooled.directBuffer();
+                    buf.writeBytes(bs);
+
+                    Api2MatchProtocol test = Api2MatchProtocol.builder().data(buf).build();
+                    future = serverChannel.writeAndFlush(test.content());
+                } else {
+                    future = serverChannel.writeAndFlush(input.concat("\n"));
+                }
 
                 if ("quit".equals(input))
                 {
