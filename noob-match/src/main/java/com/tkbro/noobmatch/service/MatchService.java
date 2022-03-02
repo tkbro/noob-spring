@@ -17,16 +17,16 @@ public class MatchService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // todo: ThreadFactory 구현체를 만들어서 디버깅을 위해 thread 정보 남기기
-    private static ScheduledExecutorService iterateSearchScheduledExecutorService = Executors.newScheduledThreadPool(100);
-    private static ScheduledExecutorService iterateStepScheduledExecutorService = Executors.newScheduledThreadPool(100);
+    private static final ScheduledExecutorService iterateSearchScheduledExecutorService = Executors.newScheduledThreadPool(100);
+    private static final ScheduledExecutorService iterateStepScheduledExecutorService = Executors.newScheduledThreadPool(100);
 
-    private Map<String, MatchingContext> matchPoolMap = new ConcurrentHashMap<>();
+    private final Map<String, MatchingContext> matchPoolMap = new ConcurrentHashMap<>();
 
     public void joinMatching(MatchingJoinContext matchingJoinContext) {
         if (matchingJoinContext == null)
             return; // 핸들러 로직 만드는 도중 임시 처리
 
-        long now = Instant.now().toEpochMilli();
+        final long now = Instant.now().toEpochMilli();
         MatchingContext matchingContext = MatchingContext.builder()
                 .userId(matchingJoinContext.getUserId())
                 .createdTime(now)

@@ -10,6 +10,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.ByteArrayOutputStream;
@@ -20,7 +21,9 @@ import java.util.Scanner;
 @SpringBootApplication
 public class NoobTestClientApplication {
     private static String host = "localhost";
-    private static int port = 8088;
+
+    @Value("port:8088")
+    private static int port;
 
     public static void main(String[] args) {
 
