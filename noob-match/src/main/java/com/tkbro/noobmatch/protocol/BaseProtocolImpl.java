@@ -1,4 +1,4 @@
-package com.tkbro.noobmatch.model.protocol;
+package com.tkbro.noobmatch.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufHolder;
@@ -6,16 +6,15 @@ import io.netty.util.IllegalReferenceCountException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
-// todo
-// ProtocolType 을 추가 (Client 와 동기화 고려 필요)
-// ProtocolType 에 1:1 매칭되는 메서드를 연결해주는 방법이 필요하
+import org.springframework.stereotype.Component;
 
 @Builder
 @Getter
-public class Api2MatchProtocol implements ByteBufHolder {
+@Setter
+public class BaseProtocolImpl implements ByteBufHolder, BaseProtocol {
 
     private ByteBuf data;
+    private ProtocolType protocolType;
 
     @Override
     public ByteBuf content() {
@@ -43,7 +42,7 @@ public class Api2MatchProtocol implements ByteBufHolder {
 
     @Override
     public ByteBufHolder replace(ByteBuf byteBuf) {
-        return Api2MatchProtocol.builder().data(byteBuf).build();
+        return new BaseProtocolImpl(byteBuf, protocolType);
     }
 
     @Override
@@ -83,5 +82,10 @@ public class Api2MatchProtocol implements ByteBufHolder {
     @Override
     public boolean release(int i) {
         return this.data.release(i);
+    }
+
+    @Override
+    public ProtocolType getType() {
+        return this.protocolType;
     }
 }
