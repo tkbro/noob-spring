@@ -6,23 +6,23 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.List;
+import java.util.*;
 
 @Component
 @Slf4j
-public class ProtocolTypeResolver implements InitializingBean {
+public class MatchProtocolTypeResolver implements InitializingBean {
 
     private final List<ProtocolController> controllers ;
+    private final Map<Byte, MatchProtocolType> protocolIdTypeMap = new HashMap<>();
 
     @Autowired
-    public ProtocolTypeResolver(List<ProtocolController> controllers) {
+    public MatchProtocolTypeResolver(List<ProtocolController> controllers) {
         this.controllers = controllers;
     }
 
     @Override
     public void afterPropertiesSet() {
-        log.info("protocol types count: {}", ProtocolType.values().length);
+        log.info("protocol types count: {}", MatchProtocolType.values().length);
         log.info("controllers count: {}", controllers.size());
         /**
          * todo : validate, route
@@ -35,5 +35,18 @@ public class ProtocolTypeResolver implements InitializingBean {
          *
          *   ** bytes 에서 type 을 추출할 수 있어야 함, header 를 정의해야하나? 필요하면 할것
          */
+
+        Arrays.stream(MatchProtocolType.values()).forEach(type -> {
+            if (this.protocolIdTypeMap.get(type.getProtocolId()) != null) {
+                // error, throw error?
+                log.error("duplicate match protocol id defined");
+            }
+
+            this.protocolIdTypeMap.put(type.getProtocolId(), type);
+        });
+    }
+
+    public Optional<MatchProtocolType> getMatchProtocolType(byte protocolId) {
+        return Optional.ofNullable(this.protocolIdTypeMap.get(protocolId));
     }
 }

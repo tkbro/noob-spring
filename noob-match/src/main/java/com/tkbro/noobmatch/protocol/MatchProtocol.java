@@ -3,23 +3,24 @@ package com.tkbro.noobmatch.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufHolder;
 import io.netty.util.IllegalReferenceCountException;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-@Builder
-@Getter
+@Component
 @Setter
-public class BaseProtocolImpl implements ByteBufHolder, BaseProtocol {
-
+@Slf4j
+@NoArgsConstructor
+public class MatchProtocol implements ByteBufHolder {
+    private BaseProtocolType protocolType;
+    private int dataSize;
     private ByteBuf data;
-    private ProtocolType protocolType;
 
     @Override
     public ByteBuf content() {
         if (this.data.refCnt() <= 0) {
-            throw new IllegalReferenceCountException(this.data.refCnt());
+            throw new IllegalReferenceCountException();
         } else {
             return this.data;
         }
@@ -42,7 +43,11 @@ public class BaseProtocolImpl implements ByteBufHolder, BaseProtocol {
 
     @Override
     public ByteBufHolder replace(ByteBuf byteBuf) {
-        return new BaseProtocolImpl(byteBuf, protocolType);
+        MatchProtocol protocol = new MatchProtocol();
+        protocol.setProtocolType(protocolType);
+        protocol.setDataSize(byteBuf.readableBytes());
+        protocol.setData(byteBuf);
+        return protocol;
     }
 
     @Override
@@ -84,8 +89,21 @@ public class BaseProtocolImpl implements ByteBufHolder, BaseProtocol {
         return this.data.release(i);
     }
 
-    @Override
-    public ProtocolType getType() {
-        return this.protocolType;
+    public void encode(ByteBuf encoded) {
+        try {
+            encoded.writeByte(protocolType.getProtocolId());
+
+            boolean hasData = this.data != null && this.data.isReadable();
+            if (hasData) {
+                encoded.writeInt(this.data.readableBytes());
+                encoded.writeBytes(this.data);
+            } else {
+                encoded.writeInt(0);
+            }
+
+        } catch (Exception e) {
+            log.error(e.toString());
+            throw e;
+        }
     }
 }

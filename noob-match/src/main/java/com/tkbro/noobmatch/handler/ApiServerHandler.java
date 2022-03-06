@@ -1,6 +1,6 @@
 package com.tkbro.noobmatch.handler;
 
-import com.tkbro.noobmatch.protocol.BaseProtocolImpl;
+import com.tkbro.noobmatch.protocol.MatchProtocol;
 import com.tkbro.noobmatch.repository.ApiSessionChannelRepository;
 import com.tkbro.noobmatch.service.MatchService;
 import io.netty.channel.ChannelDuplexHandler;
@@ -25,8 +25,8 @@ public class ApiServerHandler extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if (msg instanceof BaseProtocolImpl) {
-            BaseProtocolImpl protocol = (BaseProtocolImpl) msg;
+        if (msg instanceof MatchProtocol) {
+            MatchProtocol protocol = (MatchProtocol) msg;
             try {
                 apiSessionChannelRepository.setChannel(ctx.channel());
 
