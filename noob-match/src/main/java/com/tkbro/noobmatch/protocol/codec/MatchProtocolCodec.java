@@ -27,7 +27,7 @@ public class MatchProtocolCodec extends ByteToMessageCodec<MatchProtocol> {
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
         byte protocolId = byteBuf.readByte();
-        MatchProtocolType protocolType = this.matchProtocolTypeResolver.getMatchProtocolType(protocolId).get(); // throw if invalid id
+        MatchProtocolType protocolType = this.matchProtocolTypeResolver.getMatchProtocolType(protocolId).orElseThrow();
 
         int dataSize = byteBuf.readInt();
         ByteBuf data = byteBuf.readBytes(dataSize);

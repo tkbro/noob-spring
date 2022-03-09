@@ -40,7 +40,7 @@ public class NoobTestClientApplication {
 
             bootstrap.channel(NioSocketChannel.class);
             bootstrap.remoteAddress(new InetSocketAddress(host, port));
-            MatchProtocolTypeResolver resolver = new MatchProtocolTypeResolver(new ArrayList<>());
+            MatchProtocolTypeResolver resolver = new MatchProtocolTypeResolver();
             resolver.afterPropertiesSet();
             bootstrap.handler(new ClientInitializer(resolver));
 

@@ -1,40 +1,57 @@
 package com.tkbro.noobmatch.protocol;
 
-import com.tkbro.noobmatch.controller.ProtocolController;
+import com.tkbro.noobmatch.annotation.MatchProtocolController;
+import com.tkbro.noobmatch.annotation.MatchProtocolMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class MatchProtocolTypeResolver implements InitializingBean {
 
-    private final List<ProtocolController> controllers ;
     private final Map<Byte, MatchProtocolType> protocolIdTypeMap = new HashMap<>();
-
-    @Autowired
-    public MatchProtocolTypeResolver(List<ProtocolController> controllers) {
-        this.controllers = controllers;
-    }
+    private final Map<Byte, Method> protocolHandlerMap = new HashMap<>();
 
     @Override
     public void afterPropertiesSet() {
-        log.info("protocol types count: {}", MatchProtocolType.values().length);
-        log.info("controllers count: {}", controllers.size());
-        /**
-         * todo : validate, route
-         *  validate
-         *   1. controller 내 메서드와 매칭 되는 protocolType 이 없는지 검사
-         *   2. 1:1 이상의 메서드와 매칭되는 type 이 없는지 검사
-         *  route
-         *   1. controller 내 ProtocolType 을 메서드와 매칭해주기 위한 annotation 추가
-         *   2. 매칭되는 메서드를 controller 내에서 찾아서 적당한 자료구조로 (Function?) map 으로 만들어 두기
-         *
-         *   ** bytes 에서 type 을 추출할 수 있어야 함, header 를 정의해야하나? 필요하면 할것
-         */
+        log.debug("protocol types count: {}", MatchProtocolType.values().length);
+
+        final ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(true);
+        //scanner.addIncludeFilter(new AnnotationTypeFilter(MatchProtocolController.class));
+
+        // for validate
+        Map<Byte, Integer> validator = new HashMap<>();
+        List<Method> protocolMapperMethods = new ArrayList<>();
+        for (BeanDefinition beanDefinition : scanner.findCandidateComponents("com.tkbro.noobmatch")) {
+            protocolMapperMethods.addAll(Arrays.stream(beanDefinition.getClass().getMethods())
+                    .filter(method -> method.getAnnotation(MatchProtocolMapper.class) == null)
+                    .collect(Collectors.toList()));
+        }
+
+        for (Method candidate : protocolMapperMethods) {
+            MatchProtocolMapper protocolMapperAnnotation = (MatchProtocolMapper) candidate.getAnnotation(MatchProtocolMapper.class);
+            if (protocolMapperAnnotation == null) {
+                throw new RuntimeException("Invalid match protocol mapper method.");
+            }
+
+            MatchProtocolType protocolType = protocolMapperAnnotation.protocolType();
+            int cnt = validator.get(protocolType.getProtocolId());
+            if (cnt <= 0) {
+                throw new RuntimeException("Duplicated match protocol mapper " +
+                        "method: {}" + candidate.getName() + " type: {}" + protocolType.name());
+            }
+
+            validator.put(protocolType.getProtocolId(), cnt + 1);
+            this.protocolHandlerMap.put(protocolType.getProtocolId(), candidate);
+        }
 
         Arrays.stream(MatchProtocolType.values()).forEach(type -> {
             if (this.protocolIdTypeMap.get(type.getProtocolId()) != null) {
@@ -48,5 +65,9 @@ public class MatchProtocolTypeResolver implements InitializingBean {
 
     public Optional<MatchProtocolType> getMatchProtocolType(byte protocolId) {
         return Optional.ofNullable(this.protocolIdTypeMap.get(protocolId));
+    }
+
+    public Optional<Method> getMatchedTypeMethod(byte protocolId) {
+        return Optional.ofNullable(this.protocolHandlerMap.get(protocolId));
     }
 }

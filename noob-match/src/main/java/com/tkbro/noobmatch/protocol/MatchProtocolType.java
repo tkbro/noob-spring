@@ -7,7 +7,8 @@ import java.util.Map;
 public enum MatchProtocolType implements BaseProtocolType {
     TEST1((byte)1),
     TEST2((byte)2),
-    TEST3((byte)3);
+    TEST3((byte)3),
+    NONE((byte)(Byte.MIN_VALUE));
 
     private static Map<Byte, MatchProtocolType> protocolMap = new HashMap();
 

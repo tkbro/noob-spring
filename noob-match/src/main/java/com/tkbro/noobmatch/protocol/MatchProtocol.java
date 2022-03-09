@@ -3,12 +3,14 @@ package com.tkbro.noobmatch.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufHolder;
 import io.netty.util.IllegalReferenceCountException;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
+@Getter
 @Setter
 @Slf4j
 @NoArgsConstructor
